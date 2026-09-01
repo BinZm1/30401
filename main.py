@@ -1,70 +1,43 @@
-import streamlit as st
 import random
 
-# 앱 제목
-st.title("🎮 오버워치 2 캐릭터 추천기")
+# 역할군별 캐릭터 목록 정의
+heroes = {
+    "탱커": [
+        "디몬", "디바", "도미나", "둠피스트", "라마트라", "라인하르트", 
+        "레킹볼", "로드호그", "마우가", "시그마", "오리사", "윈스턴", 
+        "자리야", "정커퀸", "해저드"
+    ],
+    "딜러": [
+        "겐지", "리퍼", "메이", "바스티온", "벤데타", "벤처", "소전", 
+        "솔저: 76", "솜브라", "시메트라", "시에라", "시온", "안란", "애쉬", 
+        "에코", "엠레", "위도우메이커", "정크랫", "캐서디", "토르비욘", 
+        "트레이서", "파라", "프레야", "한조"
+    ],
+    "힐러": [
+        "라이프위버", "루시우", "메르시", "모이라", "미즈키", "바티스트", 
+        "브리기테", "아나", "우양", "일리아리", "제트팩 캣", "젠야타", 
+        "주노", "키리코"
+    ]
+}
 
-# 역할군 선택 버튼 (3열 레이아웃)
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    tank_selected = st.button("🛡️ 탱커", use_container_width=True)
-with col2:
-    dealer_selected = st.button("⚔️ 딜러", use_container_width=True)
-with col3:
-    healer_selected = st.button("➕ 힐러", use_container_width=True)
-
-# 버튼 클릭 상태를 세션 상태(Session State)에 저장
-if tank_selected:
-    st.session_state["role"] = "탱커"
-elif dealer_selected:
-    st.session_state["role"] = "딜러"
-elif healer_selected:
-    st.session_state["role"] = "힐러"
-
-# 오버워치 탱커 영웅 목록
-tank_heroes = [
-    "D.Va", "둠피스트", "라인하르트", "로드호그", "마우가", 
-    "라마트라", "레킹볼", "시그마", "오리사", "윈스턴", "자리야", "정커퀸"
-]
-
-# '탱커'가 선택되었을 때 실행할 화면
-if st.session_state.get("role") == "탱커":
-    st.divider()
-    st.subheader("🛡️ 탱커 역할군이 선택되었습니다.")
+def main():
+    print("=== 오버워치 영웅 랜덤 뽑기 ===")
+    print("1: 탱커 | 2: 딜러 | 3: 힐러 | 4: 전체 랜덤")
     
-    # 1. 캐릭터 등장 확률 계산 및 안내
-    total_tanks = len(tank_heroes)
-    probability = round(100 / total_tanks, 2)
+    choice = input("원하는 역할군의 번호를 입력하세요: ").strip()
     
-    st.info(f"현재 등록된 탱커 영웅은 총 **{total_tanks}명**입니다. (개별 뽑기 확률: 약 **{probability}%**)")
+    role_map = {"1": "탱커", "2": "딜러", "3": "힐러"}
     
-    # 확률표 접어두기/펼치기
-    with st.expander("📊 탱커 캐릭터별 등장 확률 확인하기"):
-        # 2열로 나누어 보기 좋게 표시
-        p_col1, p_col2 = st.columns(2)
-        for i, hero in enumerate(tank_heroes):
-            if i % 2 == 0:
-                p_col1.write(f"- **{hero}**: {probability}%")
-            else:
-                p_col2.write(f"- **{hero}**: {probability}%")
+    if choice in role_map:
+        selected_role = role_map[choice]
+        picked_hero = random.choice(heroes[selected_role])
+        print(f"\n[{selected_role}] 뽑기 결과 ➔ {picked_hero}")
+    elif choice == "4":
+        all_heroes = heroes["탱커"] + heroes["딜러"] + heroes["힐러"]
+        picked_hero = random.choice(all_heroes)
+        print(f"\n[전체 랜덤] 뽑기 결과 ➔ {picked_hero}")
+    else:
+        print("\n올바른 번호를 입력해주세요.")
 
-    # 2. '선택' 버튼 생성
-    if st.button("🎯 탱커 3명 뽑기 (선택)", type="primary", use_container_width=True):
-        # 중복 없이 3명 무작위 추첨
-        selected_heroes = random.sample(tank_heroes, 3)
-        
-        st.success("🎉 **추천된 탱커 캐릭터 3명:**")
-        
-        # 결과를 3개 카드로 나누어 출력
-        res_col1, res_col2, res_col3 = st.columns(3)
-        with res_col1:
-            st.metric(label="1번 영웅", value=selected_heroes[0])
-        with res_col2:
-            st.metric(label="2번 영웅", value=selected_heroes[1])
-        with res_col3:
-            st.metric(label="3번 영웅", value=selected_heroes[2])
-
-elif st.session_state.get("role") in ["딜러", "힐러"]:
-    st.divider()
-    st.warning(f"현재 {st.session_state['role']} 기능은 준비 중입니다. '탱커'를 선택해 주세요!")
+if __name__ == "__main__":
+    main()

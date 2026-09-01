@@ -1,7 +1,8 @@
 import streamlit as st
 import random
 
-# 앱 제목
+# 페이지 설정 및 제목
+st.set_page_config(page_title="오버워치 영웅 추천기", page_icon="🎮")
 st.title("🎮 오버워치 캐릭터 추천기")
 
 # 1. 역할군별 영웅 데이터 세팅
@@ -24,38 +25,45 @@ HERO_DATA = {
     ]
 }
 
+# 기본 선택 상태 초기화 (처음 접속 시 미선택)
+if "selected_role" not in st.session_state:
+    st.session_state["selected_role"] = None
+
+# 역할군 변경 함수 (선택 시 이전 뽑기 결과 삭제)
+def change_role(role_name):
+    st.session_state["selected_role"] = role_name
+    if "picked_heroes" in st.session_state:
+        del st.session_state["picked_heroes"]
+
 # 2. 상단 역할군 선택 버튼 (3열 레이아웃)
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("🛡️ 탱커", use_container_width=True):
-        st.session_state["role"] = "탱커"
+    st.button("🛡️ 탱커", use_container_width=True, on_click=change_role, args=("탱커",))
 with col2:
-    if st.button("⚔️ 딜러", use_container_width=True):
-        st.session_state["role"] = "딜러"
+    st.button("⚔️ 딜러", use_container_width=True, on_click=change_role, args=("딜러",))
 with col3:
-    if st.button("➕ 힐러", use_container_width=True):
-        st.session_state["role"] = "힐러"
+    st.button("➕ 힐러", use_container_width=True, on_click=change_role, args=("힐러",))
 
-# 3. 역할군이 선택된 경우의 화면 처리
-selected_role = st.session_state.get("role")
+current_role = st.session_state["selected_role"]
 
-if selected_role in HERO_DATA:
+# 3. 역할군이 선택되어 있는 경우의 화면 출력
+if current_role in HERO_DATA:
     st.divider()
     
-    # 역할군별 아이콘 매핑
-    icon = "🛡️" if selected_role == "탱커" else ("⚔️" if selected_role == "딜러" else "➕")
-    st.subheader(f"{icon} {selected_role} 역할군이 선택되었습니다.")
+    # 역할군별 아이콘 설정
+    icon = "🛡️" if current_role == "탱커" else ("⚔️" if current_role == "딜러" else "➕")
+    st.subheader(f"{icon} {current_role} 역할군")
     
-    heroes = HERO_DATA[selected_role]
+    heroes = HERO_DATA[current_role]
     total_count = len(heroes)
     probability = round(100 / total_count, 2)
     
     # 확률 정보 안내
-    st.info(f"현재 등록된 **{selected_role}** 영웅은 총 **{total_count}명**입니다. (개별 뽑기 확률: 약 **{probability}%**)")
+    st.info(f"현재 등록된 **{current_role}** 영웅은 총 **{total_count}명**입니다. (개별 뽑기 확률: 약 **{probability}%**)")
     
     # 확률표 접어두기/펼치기
-    with st.expander(f"📊 {selected_role} 캐릭터별 등장 확률 확인하기"):
+    with st.expander(f"📊 {current_role} 캐릭터별 등장 확률 확인하기"):
         p_col1, p_col2 = st.columns(2)
         for i, hero in enumerate(heroes):
             if i % 2 == 0:
@@ -64,17 +72,21 @@ if selected_role in HERO_DATA:
                 p_col2.write(f"- **{hero}**: {probability}%")
 
     # 캐릭터 3명 뽑기 버튼
-    if st.button(f"🎯 {selected_role} 3명 뽑기 (선택)", type="primary", use_container_width=True):
-        selected_heroes = random.sample(heroes, 3)
-        
-        st.success(f"🎉 **추천된 {selected_role} 캐릭터 3명:**")
+    if st.button(f"🎯 {current_role} 3명 뽑기 (선택)", type="primary", use_container_width=True):
+        st.session_state["picked_heroes"] = random.sample(heroes, 3)
+
+    # 뽑기 결과가 있는 경우 화면에 표시
+    if "picked_heroes" in st.session_state:
+        picked = st.session_state["picked_heroes"]
+        st.success(f"🎉 **추천된 {current_role} 캐릭터 3명:**")
         
         res_col1, res_col2, res_col3 = st.columns(3)
         with res_col1:
-            st.metric(label="1번 영웅", value=selected_heroes[0])
+            st.metric(label="1번 영웅", value=picked[0])
         with res_col2:
-            st.metric(label="2번 영웅", value=selected_heroes[1])
+            st.metric(label="2번 영웅", value=picked[1])
         with res_col3:
-            st.metric(label="3번 영웅", value=selected_heroes[2])
+            st.metric(label="3번 영웅", value=picked[2])
+
 else:
-    st.info("상단의 버튼을 눌러 원하는 역할군을 선택해 주세요!")
+    st.info("상단의 **탱커 / 딜러 / 힐러** 버튼을 클릭하여 역할군을 선택해 주세요!")

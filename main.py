@@ -193,7 +193,7 @@ with b_col4:
         
         st.session_state.results = [
             {"role": t_role, "hero": tank, "color": t_color},
-            {"role": d_role, "hero": d_color, "color": d_color},
+            {"role": d_role, "hero": dps, "color": d_color},
             {"role": h_role, "hero": heal, "color": h_color}
         ]
         st.rerun()

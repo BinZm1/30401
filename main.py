@@ -28,7 +28,7 @@ ROLE_COLORS = {
 }
 
 # 페이지 기본 설정
-st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="centered")
+st.set_page_config(page_title="오버워치 영웅 추천", page_icon="❤️", layout="centered")
 
 # 오버워치 다크 스타일 커스텀 CSS
 st.markdown("""

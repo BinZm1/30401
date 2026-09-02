@@ -23,12 +23,12 @@ heroes = {
 
 # 역할군 기본 색상
 ROLE_COLORS = {
-    "탱커": "#2B8CBE",  # 푸른색
+    "탱커": "#2B8CBE",  # 파란색
     "딜러": "#B71C1C",  # 어두운 빨간색
     "힐러": "#4CAF50"   # 밝은 초록색
 }
 
-# 갈색 테두리를 적용할 영웅 목록
+# 갈색 테두리 (추천 안함) 영웅 목록
 BROWN_HEROES = [
     # 탱커
     "로드호그", "라인하르트", "둠피스트", "정커퀸",
@@ -38,16 +38,34 @@ BROWN_HEROES = [
     "라이프위버", "일리아리", "모이라"
 ]
 
+# 골드색 테두리 (추천함) 영웅 목록
+GOLD_HEROES = [
+    # 탱커
+    "디몬", "시그마", "자리야", "오리사", "마우가",
+    # 딜러
+    "소전", "파라", "프레야", "엠레", "시온", "안란", "솔저: 76", "솔져76",
+    # 힐러
+    "키리코", "아나", "젠야타", "우양"
+]
+
 BROWN_COLOR = "#8B4513"  # 갈색
+GOLD_COLOR = "#FFD700"   # 골드색
 
 def get_hero_info(role_name, hero_name):
     """
-    영웅 이름을 판별하여 (표시할 역할군 텍스트, 색상) 튜플을 반환합니다.
-    갈색 영웅일 경우 '⚠️ 추천안함' 문구와 갈색을 반환합니다.
+    영웅 이름을 판별하여 (표시할 역할군/상태 텍스트, 테두리 색상) 튜플을 반환합니다.
     """
+    # 1. 골드 추천 영웅 체크
+    if hero_name in GOLD_HEROES:
+        return "⭐ 추천함", GOLD_COLOR
+    
+    # 2. 갈색 비추천 영웅 체크
     if hero_name in BROWN_HEROES:
         return "⚠️ 추천안함", BROWN_COLOR
-    return role_name, ROLE_COLORS.get(role_name.split()[0].replace("1.", "").replace("2.", "").replace("3.", "").strip(), "#F57C00")
+    
+    # 3. 일반 영웅 체크
+    base_role = role_name.split()[0].replace("1.", "").replace("2.", "").replace("3.", "").strip()
+    return role_name, ROLE_COLORS.get(base_role, "#F57C00")
 
 # 페이지 기본 설정
 st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="centered")
@@ -175,7 +193,7 @@ with b_col4:
         
         st.session_state.results = [
             {"role": t_role, "hero": tank, "color": t_color},
-            {"role": d_role, "hero": dps, "color": d_color},
+            {"role": d_role, "hero": d_color, "color": d_color},
             {"role": h_role, "hero": heal, "color": h_color}
         ]
         st.rerun()

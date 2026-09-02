@@ -1,7 +1,7 @@
 import random
-import tkinter as tk
+import streamlit as st
 
-# 역할군별 캐릭터 목록
+# 역할군별 캐릭터 목록 정의
 heroes = {
     "탱커": [
         "디몬", "디바", "도미나", "둠피스트", "라마트라", "라인하르트", 
@@ -21,106 +21,119 @@ heroes = {
     ]
 }
 
-# 역할군별 상징 색상
-ROLE_COLORS = {
-    "탱커": "#2B8CBE",  # 푸른색
-    "딜러": "#E65100",  # 주황색
-    "힐러": "#2E7D32",  # 초록색
-    "전체": "#F57C00"   # 오버워치 시그니처 주황
-}
+# 페이지 기본 설정
+st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="centered")
 
-class OverwatchPickerApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("OVERWATCH 2 - HERO PICKER")
-        self.root.geometry("480x560")
-        self.root.resizable(False, False)
+# 오버워치 다크 스타일 커스텀 CSS (배경 및 스타일 디자인)
+st.markdown("""
+    <style>
+    /* 전체 배경 설정 (다크 사선 패턴) */
+    .stApp {
+        background-color: #1A1C23;
+        background-image: repeating-linear-gradient(
+            45deg,
+            #1A1C23,
+            #1A1C23 15px,
+            #21242D 15px,
+            #21242D 30px
+        );
+    }
+    
+    /* 타이틀 스타일 */
+    .main-title {
+        text-align: center;
+        font-family: 'Impact', sans-serif;
+        font-size: 2.8rem;
+        color: #F57C00;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 4px #000000;
+    }
+    
+    .sub-title {
+        text-align: center;
+        color: #A0A5B5;
+        margin-bottom: 30px;
+    }
+    
+    /* 결과 카드 박스 */
+    .result-card {
+        background-color: #0F1015;
+        border: 2px solid #F57C00;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 0 15px rgba(245, 124, 0, 0.4);
+        margin-bottom: 30px;
+    }
+    
+    .role-badge {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .hero-name {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #FFFFFF;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-        # 캔버스 배경 설정 (패턴 구현)
-        self.canvas = tk.Canvas(self.root, width=480, height=560, highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
+# 헤더 표시
+st.markdown('<div class="main-title">OVERWATCH HERO PICKER</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">원하는 역할군을 선택하여 영웅을 뽑아보세요!</div>', unsafe_allow_html=True)
 
-        self.draw_background()
-        self.setup_ui()
+# 상태 저장 (뽑힌 캐릭터 기억)
+if "selected_role" not in st.session_state:
+    st.session_state.selected_role = "READY"
+    st.session_state.selected_hero = "?"
+    st.session_state.badge_color = "#F57C00"
 
-    def draw_background(self):
-        """다크 테마 오버워치 스타일 배경 및 스트라이프 디자인"""
-        # 어두운 기본 배경 (Hex: #1A1C23)
-        self.canvas.create_rectangle(0, 0, 480, 560, fill="#1A1C23", outline="")
+# 결과 카드 표시
+st.markdown(f"""
+    <div class="result-card">
+        <div class="role-badge" style="color: {st.session_state.badge_color};">[ {st.session_state.selected_role} ]</div>
+        <div class="hero-name">{st.session_state.selected_hero}</div>
+    </div>
+""", unsafe_allow_html=True)
 
-        # 사선 스트라이프 디자인 패턴 추가
-        for i in range(-200, 600, 24):
-            self.canvas.create_line(i, 0, i + 300, 560, fill="#232630", width=6)
+# 역할군 선택 버튼 그리드
+col1, col2, col3, col4 = st.columns(4)
 
-        # 상단 타이틀 영문 상징 라인
-        self.canvas.create_rectangle(0, 0, 480, 6, fill="#F57C00", outline="")
+with col1:
+    if st.button("🛡️ 탱커", use_container_width=True):
+        st.session_state.selected_role = "탱커"
+        st.session_state.selected_hero = random.choice(heroes["탱커"])
+        st.session_state.badge_color = "#2B8CBE"
+        st.rerun()
+
+with col2:
+    if st.button("⚔️ 딜러", use_container_width=True):
+        st.session_state.selected_role = "딜러"
+        st.session_state.selected_hero = random.choice(heroes["딜러"])
+        st.session_state.badge_color = "#E65100"
+        st.rerun()
+
+with col3:
+    if st.button("💉 힐러", use_container_width=True):
+        st.session_state.selected_role = "힐러"
+        st.session_state.selected_hero = random.choice(heroes["힐러"])
+        st.session_state.badge_color = "#2E7D32"
+        st.rerun()
+
+with col4:
+    if st.button("🎲 전체", use_container_width=True):
+        all_heroes = heroes["탱커"] + heroes["딜러"] + heroes["힐러"]
+        picked = random.choice(all_heroes)
+        # 역할군 찾기
+        for role, h_list in heroes.items():
+            if picked in h_list:
+                actual_role = role
+                break
         
-        # 결과 표시 패널 디스플레이 박스 (테두리 글로우 효과)
-        self.canvas.create_rectangle(38, 128, 442, 272, fill="#F57C00", outline="") # 외각 글로우
-        self.canvas.create_rectangle(40, 130, 440, 270, fill="#0F1015", outline="") # 내부 상자
-
-    def setup_ui(self):
-        """UI 엘리먼트 배치"""
-        # 타이틀
-        title_label = tk.Label(
-            self.root, text="OVERWATCH HERO SELECT", 
-            font=("Impact", 22), fg="#FFFFFF", bg="#1A1C23"
-        )
-        title_label.place(x=240, y=40, anchor="center")
-
-        sub_label = tk.Label(
-            self.root, text="영웅을 선택하세요", 
-            font=("맑은 고딕", 10, "bold"), fg="#8A8F9E", bg="#1A1C23"
-        )
-        sub_label.place(x=240, y=75, anchor="center")
-
-        # 결과 출력 라벨 (역할군 / 영웅 이름)
-        self.role_label = tk.Label(
-            self.root, text="READY TO PICK", 
-            font=("Impact", 14), fg="#F57C00", bg="#0F1015"
-        )
-        self.role_label.place(x=240, y=165, anchor="center")
-
-        self.result_label = tk.Label(
-            self.root, text="?", 
-            font=("맑은 고딕", 32, "bold"), fg="#FFFFFF", bg="#0F1015"
-        )
-        self.result_label.place(x=240, y=215, anchor="center")
-
-        # 버튼 생성 함수 호출
-        self.create_button("탱커", "#2B8CBE", 320)
-        self.create_button("딜러", "#D84315", 375)
-        self.create_button("힐러", "#2E7D32", 430)
-        self.create_button("전체 랜덤", "#546E7A", 485, is_all=True)
-
-    def create_button(self, text, color, y_pos, is_all=False):
-        """커스텀 호버 효과를 포함한 버튼 생성"""
-        btn = tk.Button(
-            self.root, text=text, font=("맑은 고딕", 12, "bold"),
-            fg="#FFFFFF", bg=color, activeforeground="#FFFFFF", activebackground="#1A1C23",
-            relief="flat", cursor="hand2",
-            command=lambda: self.pick_hero(text if not is_all else "전체")
-        )
-        btn.place(x=240, y=y_pos, width=380, height=44, anchor="center")
-
-    def pick_hero(self, role):
-        """랜덤 추첨 로직"""
-        if role == "전체":
-            all_list = heroes["탱커"] + heroes["딜러"] + heroes["힐러"]
-            selected_hero = random.choice(all_list)
-            # 캐릭터가 속한 실제 역할군 찾기
-            for r, h_list in heroes.items():
-                if selected_hero in h_list:
-                    actual_role = r
-                    break
-            self.role_label.config(text=f"[ {actual_role} ]", fg=ROLE_COLORS[actual_role])
-        else:
-            selected_hero = random.choice(heroes[role])
-            self.role_label.config(text=f"[ {role} ]", fg=ROLE_COLORS[role])
-
-        self.result_label.config(text=selected_hero)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = OverwatchPickerApp(root)
-    root.mainloop()
+        colors = {"탱커": "#2B8CBE", "딜러": "#E65100", "힐러": "#2E7D32"}
+        st.session_state.selected_role = actual_role
+        st.session_state.selected_hero = picked
+        st.session_state.badge_color = colors[actual_role]
+        st.rerun()

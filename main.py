@@ -21,11 +21,11 @@ heroes = {
     ]
 }
 
-# 역할군 기본 색상 변경
+# 역할군 기본 색상
 ROLE_COLORS = {
     "탱커": "#2B8CBE",  # 푸른색
-    "딜러": "#B71C1C",  # 살짝 어두운 빨간색
-    "힐러": "#4CAF50"   # 살짝 밝은 초록색
+    "딜러": "#B71C1C",  # 어두운 빨간색
+    "힐러": "#4CAF50"   # 밝은 초록색
 }
 
 # 갈색 테두리를 적용할 영웅 목록
@@ -40,11 +40,14 @@ BROWN_HEROES = [
 
 BROWN_COLOR = "#8B4513"  # 갈색
 
-def get_hero_color(role, hero_name):
-    """지정된 특수 영웅이면 갈색, 아니면 해당 역할군의 기본 색상을 반환합니다."""
+def get_hero_info(role_name, hero_name):
+    """
+    영웅 이름을 판별하여 (표시할 역할군 텍스트, 색상) 튜플을 반환합니다.
+    갈색 영웅일 경우 '⚠️ 추천안함' 문구와 갈색을 반환합니다.
+    """
     if hero_name in BROWN_HEROES:
-        return BROWN_COLOR
-    return ROLE_COLORS.get(role, "#F57C00")
+        return "⚠️ 추천안함", BROWN_COLOR
+    return role_name, ROLE_COLORS.get(role_name.split()[0].replace("1.", "").replace("2.", "").replace("3.", "").strip(), "#F57C00")
 
 # 페이지 기본 설정
 st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="centered")
@@ -133,31 +136,31 @@ b_col1, b_col2, b_col3, b_col4 = st.columns(4)
 with b_col1:
     if st.button("🛡️ 탱커 3명", use_container_width=True):
         picked = random.sample(heroes["탱커"], 3)
-        st.session_state.results = [
-            {"role": "탱커 1", "hero": picked[0], "color": get_hero_color("탱커", picked[0])},
-            {"role": "탱커 2", "hero": picked[1], "color": get_hero_color("탱커", picked[1])},
-            {"role": "탱커 3", "hero": picked[2], "color": get_hero_color("탱커", picked[2])}
-        ]
+        res_list = []
+        for i in range(3):
+            role_text, color = get_hero_info(f"탱커 {i+1}", picked[i])
+            res_list.append({"role": role_text, "hero": picked[i], "color": color})
+        st.session_state.results = res_list
         st.rerun()
 
 with b_col2:
     if st.button("⚔️ 딜러 3명", use_container_width=True):
         picked = random.sample(heroes["딜러"], 3)
-        st.session_state.results = [
-            {"role": "딜러 1", "hero": picked[0], "color": get_hero_color("딜러", picked[0])},
-            {"role": "딜러 2", "hero": picked[1], "color": get_hero_color("딜러", picked[1])},
-            {"role": "딜러 3", "hero": picked[2], "color": get_hero_color("딜러", picked[2])}
-        ]
+        res_list = []
+        for i in range(3):
+            role_text, color = get_hero_info(f"딜러 {i+1}", picked[i])
+            res_list.append({"role": role_text, "hero": picked[i], "color": color})
+        st.session_state.results = res_list
         st.rerun()
 
 with b_col3:
     if st.button("💉 힐러 3명", use_container_width=True):
         picked = random.sample(heroes["힐러"], 3)
-        st.session_state.results = [
-            {"role": "힐러 1", "hero": picked[0], "color": get_hero_color("힐러", picked[0])},
-            {"role": "힐러 2", "hero": picked[1], "color": get_hero_color("힐러", picked[1])},
-            {"role": "힐러 3", "hero": picked[2], "color": get_hero_color("힐러", picked[2])}
-        ]
+        res_list = []
+        for i in range(3):
+            role_text, color = get_hero_info(f"힐러 {i+1}", picked[i])
+            res_list.append({"role": role_text, "hero": picked[i], "color": color})
+        st.session_state.results = res_list
         st.rerun()
 
 with b_col4:
@@ -165,9 +168,14 @@ with b_col4:
         tank = random.choice(heroes["탱커"])
         dps = random.choice(heroes["딜러"])
         heal = random.choice(heroes["힐러"])
+        
+        t_role, t_color = get_hero_info("1. 탱커", tank)
+        d_role, d_color = get_hero_info("2. 딜러", dps)
+        h_role, h_color = get_hero_info("3. 힐러", heal)
+        
         st.session_state.results = [
-            {"role": "1. 탱커", "hero": tank, "color": get_hero_color("탱커", tank)},
-            {"role": "2. 딜러", "hero": dps, "color": get_hero_color("딜러", dps)},
-            {"role": "3. 힐러", "hero": heal, "color": get_hero_color("힐러", heal)}
+            {"role": t_role, "hero": tank, "color": t_color},
+            {"role": d_role, "hero": dps, "color": d_color},
+            {"role": h_role, "hero": heal, "color": h_color}
         ]
         st.rerun()

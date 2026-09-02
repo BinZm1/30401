@@ -21,11 +21,11 @@ heroes = {
     ]
 }
 
-# 기본 역할군 색상
+# 역할군 기본 색상 변경
 ROLE_COLORS = {
-    "탱커": "#2B8CBE",  # 파란색
-    "딜러": "#E65100",  # 주황색
-    "힐러": "#2E7D32"   # 초록색
+    "탱커": "#2B8CBE",  # 푸른색
+    "딜러": "#B71C1C",  # 살짝 어두운 빨간색
+    "힐러": "#4CAF50"   # 살짝 밝은 초록색
 }
 
 # 갈색 테두리를 적용할 영웅 목록
@@ -38,10 +38,10 @@ BROWN_HEROES = [
     "라이프위버", "일리아리", "모이라"
 ]
 
-BROWN_COLOR = "#8B4513"  # 갈색 (SaddleBrown)
+BROWN_COLOR = "#8B4513"  # 갈색
 
 def get_hero_color(role, hero_name):
-    """지정된 특수 영웅이면 갈색, 아니면 기본 역할군 색상을 반환합니다."""
+    """지정된 특수 영웅이면 갈색, 아니면 해당 역할군의 기본 색상을 반환합니다."""
     if hero_name in BROWN_HEROES:
         return BROWN_COLOR
     return ROLE_COLORS.get(role, "#F57C00")
@@ -78,16 +78,7 @@ st.markdown("""
         margin-bottom: 30px;
     }
     
-    /* 결과 카드 컨테이너 */
-    .result-container {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin-bottom: 30px;
-    }
-    
     .result-card {
-        flex: 1;
         background-color: #0F1015;
         border: 3px solid #F57C00;
         border-radius: 12px;

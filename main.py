@@ -69,10 +69,10 @@ def get_hero_info(role_name, hero_name):
 # 페이지 기본 설정
 st.set_page_config(page_title="오버워치 영웅 추천", page_icon="🎮", layout="wide")
 
-# 오버워치 로고가 중앙 뒤에 들어간 CSS 디자인
+# CSS 배경 및 레이아웃 수정 (배경만 나타나는 오류 해결)
 st.markdown(f"""
     <style>
-    /* 기본 배경 설정 */
+    /* 기본 앱 배경 */
     .stApp {{
         background-color: #080a0f;
         background-image: 
@@ -82,26 +82,31 @@ st.markdown(f"""
             linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
         background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
         background-position: 0 0, 0 0, -1px -1px, -1px -1px;
-        position: relative;
     }}
     
-    /* 배경 중앙 워터마크 오버워치 로고 */
-    .stApp::before {{
+    /* 중앙 오버워치 로고 배경 (워터마크) - 독립 레이어 처리 */
+    div[data-testid="stAppViewContainer"]::before {{
         content: "";
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 650px;
-        height: 650px;
+        width: 550px;
+        height: 550px;
         background-image: url('{OW_LOGO_URL}');
         background-repeat: no-repeat;
         background-position: center;
         background-size: contain;
         opacity: 0.08;
-        filter: drop-shadow(0 0 30px rgba(245, 124, 0, 0.8));
+        filter: drop-shadow(0 0 25px rgba(245, 124, 0, 0.8));
         pointer-events: none;
         z-index: 0;
+    }}
+
+    /* Streamlit 메인 콘텐츠 영역이 오버레이 뒤에 묻히지 않도록 정렬 */
+    .main .block-container {{
+        position: relative;
+        z-index: 1;
     }}
     
     /* 타이틀 디자인 */
@@ -115,8 +120,6 @@ st.markdown(f"""
         margin-top: -10px;
         margin-bottom: 5px;
         text-shadow: 0 0 25px rgba(245, 124, 0, 0.7), 2px 2px 10px #000000;
-        position: relative;
-        z-index: 1;
     }}
     
     .sub-title {{
@@ -125,13 +128,11 @@ st.markdown(f"""
         font-size: 1.15rem;
         margin-bottom: 35px;
         text-shadow: 1px 1px 3px #000000;
-        position: relative;
-        z-index: 1;
     }}
     
-    /* 결과 카드 스타일 및 호버 효과 */
+    /* 결과 카드 스타일 */
     .result-card {{
-        background: linear-gradient(135deg, rgba(22, 26, 36, 0.85), rgba(12, 14, 20, 0.95));
+        background: linear-gradient(135deg, rgba(22, 26, 36, 0.88), rgba(12, 14, 20, 0.95));
         border: 2px solid #F57C00;
         border-radius: 16px;
         padding: 24px 10px;
@@ -139,8 +140,6 @@ st.markdown(f"""
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        position: relative;
-        z-index: 1;
     }}
     
     .result-card:hover {{
@@ -246,10 +245,13 @@ with b_col4:
         st.session_state.results = [
             {"role": t_role, "hero": tank, "color": t_color},
             {"role": d1_role, "hero": dps_list[0], "color": d1_color},
-            {"role": d2_role, "hero": dps_list[1], "color": d2_color},
+            {"role": d2_role, "hero": d2_color, "hero_name": dps_list[1]}, # 구조 맞춤
             {"role": h1_role, "hero": heal_list[0], "color": h1_color},
             {"role": h2_role, "hero": heal_list[1], "color": h2_color}
         ]
+        # 위 항목 오탈자 정정
+        st.session_state.results[2] = {"role": d2_role, "hero": dps_list[1], "color": d2_color}
+        
         st.session_state.selected_mode = "조합"
         st.rerun()
 

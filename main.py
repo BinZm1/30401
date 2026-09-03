@@ -35,17 +35,17 @@ BROWN_HEROES = [
     # 딜러
     "위도우메이커", "캐서디", "토르비욘",
     # 힐러
-    "라이프위버", "일리아리", "모이라", "메르시", "바티스트", "브리기테",
+    "라이프위버", "일리아리", "모이라"
 ]
 
 # 골드색 테두리 (추천함) 영웅 목록
 GOLD_HEROES = [
     # 탱커
-    "디몬", "시그마", "자리야", "오리사", "마우가", "라마트라",
+    "디몬", "시그마", "자리야", "오리사", "마우가",
     # 딜러
-    "소전", "파라", "프레야", "엠레", "시온", "안란", "시에라", 
+    "소전", "파라", "프레야", "엠레", "시온", "안란", "솔저: 76", "솔져76",
     # 힐러
-    "키리코", "아나", "젠야타", "우양", "제트팩 캣",
+    "키리코", "아나", "젠야타", "우양"
 ]
 
 BROWN_COLOR = "#8B4513"  # 갈색
@@ -55,20 +55,16 @@ def get_hero_info(role_name, hero_name):
     """
     영웅 이름을 판별하여 (표시할 역할군/상태 텍스트, 테두리 색상) 튜플을 반환합니다.
     """
-    # 1. 골드 추천 영웅 체크
     if hero_name in GOLD_HEROES:
         return "⭐ 추천함", GOLD_COLOR
-    
-    # 2. 갈색 비추천 영웅 체크
     if hero_name in BROWN_HEROES:
         return "⚠️ 추천안함", BROWN_COLOR
     
-    # 3. 일반 영웅 체크
-    base_role = role_name.split()[0].replace("1.", "").replace("2.", "").replace("3.", "").strip()
+    base_role = role_name.split()[0].replace("1.", "").replace("2.", "").replace("3.", "").replace("4.", "").replace("5.", "").strip()
     return role_name, ROLE_COLORS.get(base_role, "#F57C00")
 
-# 페이지 기본 설정
-st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="centered")
+# 페이지 기본 설정 (넓은 레이아웃 적용)
+st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="wide")
 
 # 오버워치 다크 스타일 커스텀 CSS
 st.markdown("""
@@ -103,19 +99,19 @@ st.markdown("""
         background-color: #0F1015;
         border: 3px solid #F57C00;
         border-radius: 12px;
-        padding: 20px 10px;
+        padding: 20px 8px;
         text-align: center;
         box-shadow: 0 0 12px rgba(245, 124, 0, 0.3);
     }
     
     .role-badge {
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: bold;
         margin-bottom: 8px;
     }
     
     .hero-name {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         font-weight: bold;
         color: #FFFFFF;
         word-break: keep-all;
@@ -124,19 +120,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 헤더 표시
-st.markdown('<div class="main-title">OVERWATCH HERO PICKER</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">버튼을 눌러 영웅 3명을 무작위로 뽑아보세요!</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">OVERWATCH TEAM PICKER</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">버튼을 눌러 1탱커 2딜러 2힐러 팀 조합을 완성하세요!</div>', unsafe_allow_html=True)
 
-# 초기 세션 상태 설정
+# 초기 세션 상태 설정 (5개 슬롯)
 if "results" not in st.session_state:
     st.session_state.results = [
+        {"role": "READY", "hero": "?", "color": "#F57C00"},
+        {"role": "READY", "hero": "?", "color": "#F57C00"},
         {"role": "READY", "hero": "?", "color": "#F57C00"},
         {"role": "READY", "hero": "?", "color": "#F57C00"},
         {"role": "READY", "hero": "?", "color": "#F57C00"}
     ]
 
-# 3개의 결과 카드 표시
-cols = st.columns(3)
+# 5개의 결과 카드 나란히 표시
+cols = st.columns(5)
 for idx, item in enumerate(st.session_state.results):
     with cols[idx]:
         st.markdown(f"""
@@ -148,52 +146,29 @@ for idx, item in enumerate(st.session_state.results):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 버튼 영역
-b_col1, b_col2, b_col3, b_col4 = st.columns(4)
-
-with b_col1:
-    if st.button("🛡️ 탱커 3명", use_container_width=True):
-        picked = random.sample(heroes["탱커"], 3)
-        res_list = []
-        for i in range(3):
-            role_text, color = get_hero_info(f"탱커 {i+1}", picked[i])
-            res_list.append({"role": role_text, "hero": picked[i], "color": color})
-        st.session_state.results = res_list
-        st.rerun()
-
-with b_col2:
-    if st.button("⚔️ 딜러 3명", use_container_width=True):
-        picked = random.sample(heroes["딜러"], 3)
-        res_list = []
-        for i in range(3):
-            role_text, color = get_hero_info(f"딜러 {i+1}", picked[i])
-            res_list.append({"role": role_text, "hero": picked[i], "color": color})
-        st.session_state.results = res_list
-        st.rerun()
-
-with b_col3:
-    if st.button("💉 힐러 3명", use_container_width=True):
-        picked = random.sample(heroes["힐러"], 3)
-        res_list = []
-        for i in range(3):
-            role_text, color = get_hero_info(f"힐러 {i+1}", picked[i])
-            res_list.append({"role": role_text, "hero": picked[i], "color": color})
-        st.session_state.results = res_list
-        st.rerun()
-
-with b_col4:
-    if st.button("🎲 조합(탱딜힐)", use_container_width=True):
-        tank = random.choice(heroes["탱커"])
-        dps = random.choice(heroes["딜러"])
-        heal = random.choice(heroes["힐러"])
-        
-        t_role, t_color = get_hero_info("1. 탱커", tank)
-        d_role, d_color = get_hero_info("2. 딜러", dps)
-        h_role, h_color = get_hero_info("3. 힐러", heal)
-        
-        st.session_state.results = [
-            {"role": t_role, "hero": tank, "color": t_color},
-            {"role": d_role, "hero": dps, "color": d_color},
-            {"role": h_role, "hero": heal, "color": h_color}
-        ]
-        st.rerun()
+# 조합 버튼 (1탱 2딜 2힐)
+if st.button("🎲 5인 팀 조합 뽑기 (1탱 2딜 2힐)", use_container_width=True):
+    # 1. 탱커 1명
+    tank = random.choice(heroes["탱커"])
+    
+    # 2. 딜러 2명 (중복 없음)
+    dps_list = random.sample(heroes["딜러"], 2)
+    
+    # 3. 힐러 2명 (중복 없음)
+    heal_list = random.sample(heroes["힐러"], 2)
+    
+    # 영웅 정보 및 색상 계산
+    t_role, t_color = get_hero_info("탱커", tank)
+    d1_role, d1_color = get_hero_info("딜러 1", dps_list[0])
+    d2_role, d2_color = get_hero_info("딜러 2", dps_list[1])
+    h1_role, h1_color = get_hero_info("힐러 1", heal_list[0])
+    h2_role, h2_color = get_hero_info("힐러 2", heal_list[1])
+    
+    st.session_state.results = [
+        {"role": t_role, "hero": tank, "color": t_color},
+        {"role": d1_role, "hero": dps_list[0], "color": d1_color},
+        {"role": d2_role, "hero": dps_list[1], "color": d2_color},
+        {"role": h1_role, "hero": heal_list[0], "color": h1_color},
+        {"role": h2_role, "hero": heal_list[1], "color": h2_color}
+    ]
+    st.rerun()

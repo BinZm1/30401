@@ -55,19 +55,15 @@ def get_hero_info(role_name, hero_name):
     """
     영웅 이름을 판별하여 (표시할 역할군/상태 텍스트, 테두리 색상) 튜플을 반환합니다.
     """
-    # 1. 골드 추천 영웅 체크
     if hero_name in GOLD_HEROES:
         return "⭐ 추천함", GOLD_COLOR
-    
-    # 2. 갈색 비추천 영웅 체크
     if hero_name in BROWN_HEROES:
         return "⚠️ 추천안함", BROWN_COLOR
     
-    # 3. 일반 영웅 체크
     base_role = role_name.split()[0].replace("1.", "").replace("2.", "").replace("3.", "").replace("4.", "").replace("5.", "").strip()
     return role_name, ROLE_COLORS.get(base_role, "#F57C00")
 
-# 페이지 기본 설정 (카드가 5개이므로 wide 레이아웃 적용)
+# 페이지 기본 설정
 st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="wide")
 
 # 오버워치 다크 스타일 커스텀 CSS
@@ -124,10 +120,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 헤더 표시
-st.markdown('<div class="main-title">OVERWATCH TEAM PICKER</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">버튼을 눌러 5인 조합(1탱커 2딜러 2힐러)을 뽑아보세요!</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">OVERWATCH HERO PICKER</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">버튼을 눌러 영웅을 뽑아보세요!</div>', unsafe_allow_html=True)
 
-# 초기 세션 상태 설정 (5개 슬롯)
+# 초기 세션 상태 설정
 if "results" not in st.session_state:
     st.session_state.results = [
         {"role": "READY", "hero": "?", "color": "#F57C00"},
@@ -137,8 +133,10 @@ if "results" not in st.session_state:
         {"role": "READY", "hero": "?", "color": "#F57C00"}
     ]
 
-# 5개의 결과 카드 나란히 표시
-cols = st.columns(5)
+# 결과 카드 표시 (결과 개수에 맞춰 유동적으로 열 생성)
+num_cards = len(st.session_state.results)
+cols = st.columns(num_cards)
+
 for idx, item in enumerate(st.session_state.results):
     with cols[idx]:
         st.markdown(f"""
@@ -150,30 +148,60 @@ for idx, item in enumerate(st.session_state.results):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 조합 버튼 (1탱 2딜 2힐 전용 버튼)
-if st.button("🎲 5인 팀 조합 뽑기 (1탱 2딜 2힐)", use_container_width=True):
-    # 1. 탱커 1명 무작위
-    tank = random.choice(heroes["탱커"])
-    
-    # 2. 딜러 2명 무작위 (중복 제외)
-    dps_list = random.sample(heroes["딜러"], 2)
-    
-    # 3. 힐러 2명 무작위 (중복 제외)
-    heal_list = random.sample(heroes["힐러"], 2)
-    
-    # 순서대로 영웅 상태/색상 정보 가져오기
-    t_role, t_color = get_hero_info("1. 탱커", tank)
-    d1_role, d1_color = get_hero_info("2. 딜러 1", dps_list[0])
-    d2_role, d2_color = get_hero_info("3. 딜러 2", dps_list[1])
-    h1_role, h1_color = get_hero_info("4. 힐러 1", heal_list[0])
-    h2_role, h2_color = get_hero_info("5. 힐러 2", heal_list[1])
-    
-    # 5개 카드 데이터 세팅 (1:탱, 2~3:딜, 4~5:힐)
-    st.session_state.results = [
-        {"role": t_role, "hero": tank, "color": t_color},
-        {"role": d1_role, "hero": dps_list[0], "color": d1_color},
-        {"role": d2_role, "hero": dps_list[1], "color": d2_color},
-        {"role": h1_role, "hero": heal_list[0], "color": h1_color},
-        {"role": h2_role, "hero": heal_list[1], "color": h2_color}
-    ]
-    st.rerun()
+# 버튼 영역 (4개 버튼)
+b_col1, b_col2, b_col3, b_col4 = st.columns(4)
+
+# 1. 탱커 3명 뽑기
+with b_col1:
+    if st.button("🛡️ 탱커 3명", use_container_width=True):
+        picked = random.sample(heroes["탱커"], 3)
+        res_list = []
+        for i in range(3):
+            role_text, color = get_hero_info(f"탱커 {i+1}", picked[i])
+            res_list.append({"role": role_text, "hero": picked[i], "color": color})
+        st.session_state.results = res_list
+        st.rerun()
+
+# 2. 딜러 3명 뽑기
+with b_col2:
+    if st.button("⚔️ 딜러 3명", use_container_width=True):
+        picked = random.sample(heroes["딜러"], 3)
+        res_list = []
+        for i in range(3):
+            role_text, color = get_hero_info(f"딜러 {i+1}", picked[i])
+            res_list.append({"role": role_text, "hero": picked[i], "color": color})
+        st.session_state.results = res_list
+        st.rerun()
+
+# 3. 힐러 3명 뽑기
+with b_col3:
+    if st.button("💉 힐러 3명", use_container_width=True):
+        picked = random.sample(heroes["힐러"], 3)
+        res_list = []
+        for i in range(3):
+            role_text, color = get_hero_info(f"힐러 {i+1}", picked[i])
+            res_list.append({"role": role_text, "hero": picked[i], "color": color})
+        st.session_state.results = res_list
+        st.rerun()
+
+# 4. 5인 팀 조합 (1탱 2딜 2힐)
+with b_col4:
+    if st.button("🎲 팀 조합 (1탱 2딜 2힐)", use_container_width=True):
+        tank = random.choice(heroes["탱커"])
+        dps_list = random.sample(heroes["딜러"], 2)
+        heal_list = random.sample(heroes["힐러"], 2)
+        
+        t_role, t_color = get_hero_info("1. 탱커", tank)
+        d1_role, d1_color = get_hero_info("2. 딜러 1", dps_list[0])
+        d2_role, d2_color = get_hero_info("3. 딜러 2", dps_list[1])
+        h1_role, h1_color = get_hero_info("4. 힐러 1", heal_list[0])
+        h2_role, h2_color = get_hero_info("5. 힐러 2", heal_list[1])
+        
+        st.session_state.results = [
+            {"role": t_role, "hero": tank, "color": t_color},
+            {"role": d1_role, "hero": dps_list[0], "color": d1_color},
+            {"role": d2_role, "hero": dps_list[1], "color": d2_color},
+            {"role": h1_role, "hero": heal_list[0], "color": h1_color},
+            {"role": h2_role, "hero": heal_list[1], "color": h2_color}
+        ]
+        st.rerun()

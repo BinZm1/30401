@@ -64,7 +64,7 @@ def get_hero_info(role_name, hero_name):
     return role_name, ROLE_COLORS.get(base_role, "#F57C00")
 
 # 페이지 기본 설정
-st.set_page_config(page_title="오버워치 영웅 뽑기", page_icon="🎮", layout="wide")
+st.set_page_config(page_title="오버워치 영웅 추천", page_icon="🎮", layout="wide")
 
 # 고급스러운 오버워치 테마 CSS 디자인
 st.markdown("""
@@ -81,12 +81,13 @@ st.markdown("""
         background-position: 0 0, 0 0, -1px -1px, -1px -1px;
     }
     
-    /* 타이틀 디자인 */
+    /* 타이틀 디자인 (한글 폰트 적용) */
     .main-title {
         text-align: center;
-        font-family: 'Impact', sans-serif;
+        font-family: 'Pretendard', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+        font-weight: 900;
         font-size: 3.2rem;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
         color: #F57C00;
         margin-top: -10px;
         margin-bottom: 5px;
@@ -133,8 +134,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 헤더 표시
-st.markdown('<div class="main-title">OVERWATCH HERO PICKER</div>', unsafe_allow_html=True)
+# 한글 헤더 표시
+st.markdown('<div class="main-title">오버워치 영웅 추천</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">버튼을 눌러 영웅을 무작위로 뽑아보세요!</div>', unsafe_allow_html=True)
 
 # 초기 세션 상태 설정

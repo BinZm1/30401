@@ -1,6 +1,12 @@
 import random
 import streamlit as st
 
+# ---------------------------------------------------------
+# [설정] 탱커 전용 배경 이미지 URL/경로
+# 이미지 파일 경로 또는 이미지 URL 주소를 입력하세요.
+# ---------------------------------------------------------
+TANK_BG_URL = "https://i.imgur.com/8Q9Z5q3.jpg"  # 올리신 마우가 이미지 주소/파일 경로로 변경 가능
+
 # 역할군별 캐릭터 목록 정의
 heroes = {
     "탱커": [
@@ -52,9 +58,6 @@ BROWN_COLOR = "#8B4513"  # 갈색
 GOLD_COLOR = "#FFD700"   # 골드색
 
 def get_hero_info(role_name, hero_name):
-    """
-    영웅 이름을 판별하여 (표시할 역할군/상태 텍스트, 테두리 색상) 튜플을 반환합니다.
-    """
     if hero_name in GOLD_HEROES:
         return "⭐ 추천함", GOLD_COLOR
     if hero_name in BROWN_HEROES:
@@ -66,79 +69,7 @@ def get_hero_info(role_name, hero_name):
 # 페이지 기본 설정
 st.set_page_config(page_title="오버워치 영웅 추천", page_icon="🎮", layout="wide")
 
-# 고급스러운 오버워치 테마 CSS 디자인
-st.markdown("""
-    <style>
-    /* 배경 그래디언트 및 사이버네틱 그리드 패턴 */
-    .stApp {
-        background-color: #0d0f12;
-        background-image: 
-            radial-gradient(circle at 50% 20%, rgba(245, 124, 0, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(43, 140, 190, 0.1) 0%, transparent 40%),
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
-        background-position: 0 0, 0 0, -1px -1px, -1px -1px;
-    }
-    
-    /* 타이틀 디자인 (한글 폰트 적용) */
-    .main-title {
-        text-align: center;
-        font-family: 'Pretendard', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
-        font-weight: 900;
-        font-size: 3.2rem;
-        letter-spacing: 1px;
-        color: #F57C00;
-        margin-top: -10px;
-        margin-bottom: 5px;
-        text-shadow: 0 0 20px rgba(245, 124, 0, 0.6), 3px 3px 6px #000000;
-    }
-    
-    .sub-title {
-        text-align: center;
-        color: #A0A5B5;
-        font-size: 1.1rem;
-        margin-bottom: 35px;
-        text-shadow: 1px 1px 2px #000000;
-    }
-    
-    /* 결과 카드 스타일 및 반응형 호버 효과 */
-    .result-card {
-        background: linear-gradient(145deg, #161922, #0b0c10);
-        border: 2px solid #F57C00;
-        border-radius: 16px;
-        padding: 24px 10px;
-        text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        backdrop-filter: blur(5px);
-    }
-    
-    .result-card:hover {
-        transform: translateY(-6px);
-    }
-    
-    .role-badge {
-        font-size: 0.95rem;
-        font-weight: 800;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-    }
-    
-    .hero-name {
-        font-size: 1.45rem;
-        font-weight: 800;
-        color: #FFFFFF;
-        word-break: keep-all;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# 한글 헤더 표시
-st.markdown('<div class="main-title">오버워치 영웅 추천</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">버튼을 눌러 영웅을 무작위로 뽑아보세요!</div>', unsafe_allow_html=True)
-
-# 초기 세션 상태 설정
+# 세션 상태 초기화
 if "results" not in st.session_state:
     st.session_state.results = [
         {"role": "READY", "hero": "?", "color": "#F57C00"},
@@ -149,6 +80,90 @@ if "results" not in st.session_state:
     ]
 if "selected_mode" not in st.session_state:
     st.session_state.selected_mode = None
+
+# 동적 배경 스타일 처리 (탱커 버튼 누를 시 마우가 배경화면 적용)
+bg_css = """
+    background-color: #0d0f12;
+    background-image: 
+        radial-gradient(circle at 50% 20%, rgba(245, 124, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(43, 140, 190, 0.1) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+"""
+
+# 탱커 모드일 때만 불투명 마우가 배경 덮어씌우기
+if st.session_state.selected_mode == "탱커":
+    bg_css = f"""
+        background-color: #0d0f12;
+        background-image: 
+            linear-gradient(rgba(13, 15, 18, 0.75), rgba(13, 15, 18, 0.75)),
+            url('{TANK_BG_URL}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    """
+
+st.markdown(f"""
+    <style>
+    .stApp {{
+        {bg_css}
+    }}
+    
+    .main-title {{
+        text-align: center;
+        font-family: 'Pretendard', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+        font-weight: 900;
+        font-size: 3.2rem;
+        letter-spacing: 1px;
+        color: #F57C00;
+        margin-top: -10px;
+        margin-bottom: 5px;
+        text-shadow: 0 0 20px rgba(245, 124, 0, 0.6), 3px 3px 6px #000000;
+    }}
+    
+    .sub-title {{
+        text-align: center;
+        color: #A0A5B5;
+        font-size: 1.1rem;
+        margin-bottom: 35px;
+        text-shadow: 1px 1px 2px #000000;
+    }}
+    
+    .result-card {{
+        background: linear-gradient(145deg, rgba(22, 25, 34, 0.9), rgba(11, 12, 16, 0.9));
+        border: 2px solid #F57C00;
+        border-radius: 16px;
+        padding: 24px 10px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        backdrop-filter: blur(8px);
+    }}
+    
+    .result-card:hover {{
+        transform: translateY(-6px);
+    }}
+    
+    .role-badge {{
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }}
+    
+    .hero-name {{
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        word-break: keep-all;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }}
+    </style>
+""", unsafe_allow_html=True)
+
+# 헤더 표시
+st.markdown('<div class="main-title">오버워치 영웅 추천</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">버튼을 눌러 영웅을 무작위로 뽑아보세요!</div>', unsafe_allow_html=True)
 
 # 결과 카드 표시
 num_cards = len(st.session_state.results)

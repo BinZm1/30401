@@ -132,8 +132,10 @@ if "results" not in st.session_state:
         {"role": "READY", "hero": "?", "color": "#F57C00"},
         {"role": "READY", "hero": "?", "color": "#F57C00"}
     ]
+if "selected_mode" not in st.session_state:
+    st.session_state.selected_mode = None  # '탱커', '딜러', '힐러', '조합' 모드 저장
 
-# 결과 카드 표시 (결과 개수에 맞춰 유동적으로 열 생성)
+# 결과 카드 표시
 num_cards = len(st.session_state.results)
 cols = st.columns(num_cards)
 
@@ -160,6 +162,7 @@ with b_col1:
             role_text, color = get_hero_info(f"탱커 {i+1}", picked[i])
             res_list.append({"role": role_text, "hero": picked[i], "color": color})
         st.session_state.results = res_list
+        st.session_state.selected_mode = "탱커"
         st.rerun()
 
 # 2. 딜러 3명 뽑기
@@ -171,6 +174,7 @@ with b_col2:
             role_text, color = get_hero_info(f"딜러 {i+1}", picked[i])
             res_list.append({"role": role_text, "hero": picked[i], "color": color})
         st.session_state.results = res_list
+        st.session_state.selected_mode = "딜러"
         st.rerun()
 
 # 3. 힐러 3명 뽑기
@@ -182,6 +186,7 @@ with b_col3:
             role_text, color = get_hero_info(f"힐러 {i+1}", picked[i])
             res_list.append({"role": role_text, "hero": picked[i], "color": color})
         st.session_state.results = res_list
+        st.session_state.selected_mode = "힐러"
         st.rerun()
 
 # 4. 5인 팀 조합 (1탱 2딜 2힐)
@@ -204,4 +209,44 @@ with b_col4:
             {"role": h1_role, "hero": heal_list[0], "color": h1_color},
             {"role": h2_role, "hero": heal_list[1], "color": h2_color}
         ]
+        st.session_state.selected_mode = "조합"
         st.rerun()
+
+# 확률표 표시 함수
+def show_probability_table(role_key):
+    hero_list = heroes[role_key]
+    total_count = len(hero_list)
+    prob = round(100 / total_count, 2)
+    
+    st.markdown(f"### 📊 {role_key} 등장 확률표 (총 {total_count}명 / 각각 약 {prob}%)")
+    
+    table_data = []
+    for hero in hero_list:
+        status = "보통"
+        if hero in GOLD_HEROES:
+            status = "⭐ 추천함"
+        elif hero in BROWN_HEROES:
+            status = "⚠️ 추천안함"
+            
+        table_data.append({
+            "영웅 이름": hero,
+            "등장 확률": f"{prob}%",
+            "추천 상태": status
+        })
+    st.dataframe(table_data, use_container_width=True)
+
+# 선택한 모드에 맞춰 동적 확률표 보여주기
+if st.session_state.selected_mode in ["탱커", "딜러", "힐러"]:
+    mode = st.session_state.selected_mode
+    with st.expander(f"📊 {mode} 확률표 보기", expanded=True):
+        show_probability_table(mode)
+
+elif st.session_state.selected_mode == "조합":
+    with st.expander("📊 팀 조합 확률표 보기 (탱커 / 딜러 / 힐러)", expanded=True):
+        tab1, tab2, tab3 = st.tabs(["🛡️ 탱커 확률", "⚔️ 딜러 확률", "💉 힐러 확률"])
+        with tab1:
+            show_probability_table("탱커")
+        with tab2:
+            show_probability_table("딜러")
+        with tab3:
+            show_probability_table("힐러")

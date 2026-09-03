@@ -1,6 +1,9 @@
 import random
 import streamlit as st
 
+# 오버워치 로고 이미지 (PNG)
+OW_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/5/55/Overwatch_circle_logo.svg"
+
 # 역할군별 캐릭터 목록 정의
 heroes = {
     "탱커": [
@@ -66,24 +69,43 @@ def get_hero_info(role_name, hero_name):
 # 페이지 기본 설정
 st.set_page_config(page_title="오버워치 영웅 추천", page_icon="🎮", layout="wide")
 
-# 강화된 오버워치 사이버 테마 CSS 배경 디자인
-st.markdown("""
+# 오버워치 로고가 중앙 뒤에 들어간 CSS 디자인
+st.markdown(f"""
     <style>
-    /* 입체형 멀티 그라데이션 및 네온 격자 배경 */
-    .stApp {
+    /* 기본 배경 설정 */
+    .stApp {{
         background-color: #080a0f;
         background-image: 
-            radial-gradient(circle at 50% -10%, rgba(245, 124, 0, 0.25) 0%, transparent 60%),
+            radial-gradient(circle at 50% 15%, rgba(245, 124, 0, 0.25) 0%, transparent 60%),
             radial-gradient(circle at 10% 90%, rgba(43, 140, 190, 0.18) 0%, transparent 50%),
-            radial-gradient(circle at 90% 80%, rgba(245, 124, 0, 0.12) 0%, transparent 40%),
-            linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-        background-size: 100% 100%, 100% 100%, 100% 100%, 30px 30px, 30px 30px;
-        background-position: 0 0, 0 0, 0 0, -1px -1px, -1px -1px;
-    }
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+        background-position: 0 0, 0 0, -1px -1px, -1px -1px;
+        position: relative;
+    }}
+    
+    /* 배경 중앙 워터마크 오버워치 로고 */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 650px;
+        height: 650px;
+        background-image: url('{OW_LOGO_URL}');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        opacity: 0.08;
+        filter: drop-shadow(0 0 30px rgba(245, 124, 0, 0.8));
+        pointer-events: none;
+        z-index: 0;
+    }}
     
     /* 타이틀 디자인 */
-    .main-title {
+    .main-title {{
         text-align: center;
         font-family: 'Pretendard', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
         font-weight: 900;
@@ -93,18 +115,22 @@ st.markdown("""
         margin-top: -10px;
         margin-bottom: 5px;
         text-shadow: 0 0 25px rgba(245, 124, 0, 0.7), 2px 2px 10px #000000;
-    }
+        position: relative;
+        z-index: 1;
+    }}
     
-    .sub-title {
+    .sub-title {{
         text-align: center;
         color: #B0B7C6;
         font-size: 1.15rem;
         margin-bottom: 35px;
         text-shadow: 1px 1px 3px #000000;
-    }
+        position: relative;
+        z-index: 1;
+    }}
     
     /* 결과 카드 스타일 및 호버 효과 */
-    .result-card {
+    .result-card {{
         background: linear-gradient(135deg, rgba(22, 26, 36, 0.85), rgba(12, 14, 20, 0.95));
         border: 2px solid #F57C00;
         border-radius: 16px;
@@ -113,26 +139,28 @@ st.markdown("""
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-    }
+        position: relative;
+        z-index: 1;
+    }}
     
-    .result-card:hover {
+    .result-card:hover {{
         transform: translateY(-8px);
-    }
+    }}
     
-    .role-badge {
+    .role-badge {{
         font-size: 0.95rem;
         font-weight: 800;
         letter-spacing: 1px;
         margin-bottom: 12px;
-    }
+    }}
     
-    .hero-name {
+    .hero-name {{
         font-size: 1.45rem;
         font-weight: 800;
         color: #FFFFFF;
         word-break: keep-all;
         text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
+    }}
     </style>
 """, unsafe_allow_html=True)
 
